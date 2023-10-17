@@ -11,6 +11,7 @@ HEIGHT = 900  # ゲームウィンドウの高さ
 NUM_OF_BOMBS = 5
 
 
+
 def check_bound(obj_rct: pg.Rect) -> tuple[bool, bool]:
     """
     オブジェクトが画面内or画面外を判定し，真理値タプルを返す関数
@@ -187,6 +188,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
+    beams = []
     
     clock = pg.time.Clock()
     tmr = 0
@@ -200,6 +202,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beam = Beam(bird)
+                beams.append(beam)
 
         
         screen.blit(bg_img, [0, 0])
@@ -232,13 +235,14 @@ def main():
                     pg.display.update()
                            
         bombs = [bomb for bomb in bombs if bomb is not None]
+        beams = [beam for beam in beams if check_bound(beam.rct) == (True, True)]
 
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for bomb in bombs:
             bomb.update(screen)
-        if beam is not None:
+        for beam in beams:
             beam.update(screen)
 
 
