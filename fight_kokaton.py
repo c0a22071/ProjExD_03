@@ -161,7 +161,7 @@ class Beam:
         screen.blit(self.img, self.rct)
 
 class Explosion:
-    def __init__(self, center):
+    def __init__(self, center):#center:爆弾の座標
         # 爆発の画像リストを作成
         self.images = [pg.image.load("ex03/fig/explosion.gif")]
         self.images += [pg.transform.flip(img, True, False) for img in self.images]  # 左右反転
@@ -181,6 +181,32 @@ class Explosion:
             self.image = self.images[self.image_index]
             return True  # 爆発が続行
     
+class Score:
+    def __init__(self):
+        # フォントの設定
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        # 文字色の設定 (青)
+        self.color = (0, 0, 255)
+        # スコアの初期値
+        self.value = 0
+        # スコアの表示位置
+        self.position = (100, HEIGHT - 50)
+
+        # スコア表示用の文字列Surfaceの生成
+        self.img = self.font.render(f"Score: {self.value}", True, self.color)
+
+    def update(self):
+        # 現在のスコアを表示させる文字列Surfaceの生成
+        self.img = self.font.render(f"Score: {self.value}", True, self.color)
+
+    def increase_score(self):
+        # スコアを1点増やす
+        self.value += 1
+        self.update()
+
+    def draw(self, screen):
+        # スコアをスクリーンに描画
+        screen.blit(self.img, self.position)
 
 
 def main():
@@ -188,6 +214,8 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
+    score = Score()  # Scoreクラスのインスタンスを作成
+
     beams = []
     
     clock = pg.time.Clock()
@@ -233,6 +261,11 @@ def main():
 
                     bird.change_img(6, screen)
                     pg.display.update()
+
+        # スコアアップの処理
+        for bomb in bombs:
+            if bomb is None:
+                score.increase_score()
                            
         bombs = [bomb for bomb in bombs if bomb is not None]
         beams = [beam for beam in beams if check_bound(beam.rct) == (True, True)]
@@ -244,6 +277,9 @@ def main():
             bomb.update(screen)
         for beam in beams:
             beam.update(screen)
+
+        # スコアを描画
+        score.draw(screen)
 
 
         pg.display.update()
