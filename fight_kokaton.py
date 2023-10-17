@@ -179,8 +179,7 @@ class Explosion:
             self.image_index = (self.image_index + 1) % len(self.images)
             self.image = self.images[self.image_index]
             return True  # 爆発が続行
-       
-
+    
 
 
 def main():
@@ -188,7 +187,7 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
-
+    
     clock = pg.time.Clock()
     tmr = 0
     beam = None
@@ -212,18 +211,7 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-            
-        for i, bomb in enumerate(bombs):
-            if beam is not None:
-                if beam.rct.colliderect(bomb.rct):
-                    explosions.append(Explosion(bomb.rct.center))
-                    beam = None
-                    bombs[i] = None
-                    bird.change_img(6, screen)
-                    pg.display.update()
-                           
-        bombs = [bomb for bomb in bombs if bomb is not None]
-
+        
         # 爆発の更新と描画
         for explosion in explosions:
             if not explosion.update():
@@ -232,6 +220,19 @@ def main():
             else:
                 screen.blit(explosion.image, explosion.rect)
 
+            
+        for i, bomb in enumerate(bombs):
+            if beam is not None:
+                if beam.rct.colliderect(bomb.rct):
+                    explosions.append(Explosion(bomb.rct.center))
+                    beam = None
+                    bombs[i] = None
+
+                    bird.change_img(6, screen)
+                    pg.display.update()
+                           
+        bombs = [bomb for bomb in bombs if bomb is not None]
+
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
@@ -239,6 +240,8 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
