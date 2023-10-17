@@ -180,13 +180,42 @@ class Explosion:
             self.image = self.images[self.image_index]
             return True  # 爆発が続行
     
+class Score:
+    def __init__(self):
+        # フォントの設定
+        self.font = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        # 文字色の設定 (青)
+        self.color = (0, 0, 255)
+        # スコアの初期値
+        self.value = 0
+        # スコアの表示位置
+        self.position = (100, HEIGHT - 50)
 
+        # スコア表示用の文字列Surfaceの生成
+        self.img = self.font.render(f"Score: {self.value}", True, self.color)
+
+    def update(self):
+        # 現在のスコアを表示させる文字列Surfaceの生成
+        self.img = self.font.render(f"Score: {self.value}", True, self.color)
+
+    def increase_score(self):
+        # スコアを1点増やす
+        self.value += 1
+        self.update()
+
+    def draw(self, screen):
+        # スコアをスクリーンに描画
+        screen.blit(self.img, self.position)
+
+# main関数にScoreクラスを統合
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
     bg_img = pg.image.load("ex03/fig/pg_bg.jpg")
     bird = Bird(3, (900, 400))
+    score = Score()  # Scoreクラスのインスタンスを作成
+
     
     clock = pg.time.Clock()
     tmr = 0
@@ -230,6 +259,11 @@ def main():
 
                     bird.change_img(6, screen)
                     pg.display.update()
+                    
+        # スコアアップの処理
+        for bomb in bombs:
+            if bomb is None:
+                score.increase_score()
                            
         bombs = [bomb for bomb in bombs if bomb is not None]
 
@@ -240,6 +274,10 @@ def main():
             bomb.update(screen)
         if beam is not None:
             beam.update(screen)
+        
+        # スコアを描画
+        score.draw(screen)
+
 
 
         pg.display.update()
