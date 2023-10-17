@@ -1,6 +1,7 @@
 import random
 import sys
 import time
+import math
 
 import pygame as pg
 
@@ -56,6 +57,8 @@ class Bird:
         self.img = self.imgs[(+5, 0)]
         self.rct = self.img.get_rect()
         self.rct.center = xy
+        self.dire = (+5, 0)  # 方向タプル
+
 
     def change_img(self, num: int, screen: pg.Surface):
         """
@@ -77,12 +80,19 @@ class Bird:
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
+
+        if sum_mv != [0, 0]:
+            self.dire = tuple(sum_mv)  # 方向を更新
+
         self.rct.move_ip(sum_mv)
         if check_bound(self.rct) != (True, True):
             self.rct.move_ip(-sum_mv[0], -sum_mv[1])
-        if not (sum_mv[0] == 0 and sum_mv[1] == 0):
-            self.img = self.imgs[tuple(sum_mv)]
+
+        if self.dire in self.imgs:
+            self.img = self.imgs[self.dire]
         screen.blit(self.img, self.rct)
+
+        
 
 class Bomb:
     """
@@ -124,11 +134,21 @@ class Beam:
         """
         弾の画像Surfaceを生成する
         """
+
+        dire = bird.dire
         self.img = pg.image.load("ex03/fig/beam.png")
+        angle = math.degrees(math.atan2(-dire[1], dire[0]))
+
+        img = pg.transform.rotozoom(self.img, angle, 1.0)
+        self.img = img
+
         self.rct = self.img.get_rect()
-        self.rct.left = bird.rct.right # こうかとんの右横座標
-        self.rct.centery = bird.rct.centery # こうかとんの中心縦座標
-        self.vx, self.vy = +5, 0
+        self.rct.width = bird.rct.width  # こうかとんの横幅
+        self.rct.height = bird.rct.height  # こうかとんの高さ
+        self.rct.centerx = bird.rct.centerx + (self.rct.width * dire[0] // 5)
+        self.rct.centery = bird.rct.centery + (self.rct.height * dire[1] // 5)
+        self.vx, self.vy = dire
+        
 
 
 
