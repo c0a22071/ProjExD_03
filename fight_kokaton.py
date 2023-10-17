@@ -138,7 +138,28 @@ class Beam:
         """
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
-        
+
+class Explosion:
+    def __init__(self, center):
+        # 爆発の画像リストを作成
+        self.images = [pg.image.load("ex03/fig/explosion.gif")]
+        self.images += [pg.transform.flip(img, True, False) for img in self.images]  # 左右反転
+        self.image_index = 0  # 画像リストのインデックス
+        self.image = self.images[self.image_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = center
+        self.life = 10  # 爆発時間
+
+    def update(self):
+        self.life -= 1
+        if self.life <= 0:
+            return False  # 爆発が終了
+        else:
+            # 爆発経過時間に応じて画像を交互に切り替え
+            self.image_index = (self.image_index + 1) % len(self.images)
+            self.image = self.images[self.image_index]
+            return True  # 爆発が続行
+       
 
 
 
@@ -152,6 +173,7 @@ def main():
     tmr = 0
     beam = None
     bombs = [Bomb() for _ in range(NUM_OF_BOMBS)]  # 爆弾リストを生成
+    explosions = []
 
     while True:
         for event in pg.event.get():
@@ -170,15 +192,25 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+            
         for i, bomb in enumerate(bombs):
             if beam is not None:
                 if beam.rct.colliderect(bomb.rct):
+                    explosions.append(Explosion(bomb.rct.center))
                     beam = None
                     bombs[i] = None
                     bird.change_img(6, screen)
                     pg.display.update()
                            
         bombs = [bomb for bomb in bombs if bomb is not None]
+
+        # 爆発の更新と描画
+        for explosion in explosions:
+            if not explosion.update():
+                # 爆発が終了した場合、リストから削除
+                explosions.remove(explosion)
+            else:
+                screen.blit(explosion.image, explosion.rect)
 
 
         key_lst = pg.key.get_pressed()
